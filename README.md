@@ -161,7 +161,7 @@ intended as a humble 'serving suggestion'.
 
 The more common form of extension in iostreams is to teach it to output
 your own types, simply by adding yet another overload for `operator<<`.
-Alas, `operator()` may only be defined as a method of a type; a 
+`operator()` may only be defined as a method of a type; a 
 overloadable plain function called `Writer_streamer` is defined for this 
 purpose.
 
@@ -196,6 +196,8 @@ outs("ints ",vi)("doubles ",vd)();
 Alas, but my attempts to completely define `operator()` as a template
 were frustrated by the specificity of template type deduction. So the custom
 template operator has the signature `(const char *,const T& v)`.
+It would be extremely cool if someone could show the way
+forward here.
 
 ## Output in a Hurry
 
@@ -222,5 +224,15 @@ outs VX64(id_number) ();
 // can say logs.set(nullptr) to switch off tracing
 #define TRACE if (logs) logs ("TRACE")
 TRACE VA(full_name) ();
+
+```
+Speaking of speed, how much speed are we losing relative to stdio?
+
+`speedtest.cpp` writes a million lines to a file; each line consists
+of five double values separated by spaces. Obviously we are
+calling the underlying formatted write function a lot more, but
+in the end it makes little difference:
+
+```
 
 ```

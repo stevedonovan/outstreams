@@ -7,9 +7,12 @@ all: $(TESTS)
 testout: testout.o outstream.o
 	g++ -o $@ $< $(LDFLAGS)
 	
-test:
+test: testout
 	./testout > test.tmp
 	diff test.tmp test.results
+
+speed: speedtest
+	./speedtest
 
 speedtest: speedtest.o outstream.o
 	g++ -o $@ $< $(LDFLAGS)
