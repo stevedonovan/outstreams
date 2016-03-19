@@ -1,0 +1,4 @@
+default {
+   cpp11.program {'testout',src='testout outstream'},
+   cpp11.program {'speedtest',src='speedtest outstream'}
+}
