@@ -14,10 +14,10 @@ systems with limited program space. Even `std::string` is now entangled
 with `iostreams`. I've written about this unfortunate [state of affairs] before,
 but the standard is the standard.
 
-Apart from the bloat, 
+Apart from the bloat,
 getting precise output with iostreams is harder than with stdio - once you've
 marshalled all the necessary manipulators to force the correct format, the
-result is more verbose.  Then there are some misfeatures; a lot of people 
+result is more verbose.  Then there are some misfeatures; a lot of people
 don't know that `endl` is more than just a line-end; it _flushes the stream_.
 They wonder why their C++ programs have such bad I/O performance
 and end up on Stackoverflow.
@@ -67,7 +67,7 @@ empty call outputs '\n' and sets the eoln state so that we will not get
 a separator on the start of the next line.
 
 The advantage of the call operator is that it may have extra optional arguments,
-in this case an explicit format.  "'%s'" is a bit clumsy, so "q" can be used here 
+in this case an explicit format.  "'%s'" is a bit clumsy, so "q" can be used here
 ("Q" for double quotes). The real power of 'q/Q' comes when it is applied to
 multiple fields, since only the string fields will obey it.
 
@@ -83,8 +83,8 @@ outs();
 
 ## Support for Containers
 
-The above idiom is common enough that there is a  template version of 
-`operator()` for displaying the elements of a container. Note that the 
+The above idiom is common enough that there is a  template version of
+`operator()` for displaying the elements of a container. Note that the
 sticky separator is not used - since we cannot guarantee it will be suitable.
 
 ```cpp
@@ -149,20 +149,20 @@ public:
     virtual void write_char(char ch) {
         s += ch;
     }
-    
+
     virtual void write_out(const char *fmt, va_list ap) {
         int nch = vsnprintf(buf,sizeof(buf),fmt,ap);
-        s.append(buf,nch);    
+        s.append(buf,nch);
     }
 };
 ```
-No doubt this can be improved (keep a resizable line buffer) but this is 
+No doubt this can be improved (keep a resizable line buffer) but this is
 intended as a humble 'serving suggestion'.
 
 The more common form of extension in iostreams is to teach it to output
 your own types, simply by adding yet another overload for `operator<<`.
-`operator()` may only be defined as a method of a type; a 
-overloadable plain function called `Writer_streamer` is defined for this 
+`operator()` may only be defined as a method of a type; a
+overloadable plain function called `Writer_streamer` is defined for this
 purpose.
 
 ```cpp
@@ -255,11 +255,11 @@ However, there are some immediate advantages to doing a wrapper around
 ```cpp
 #include "instream.h"
 ...
-    string line;
-    Reader inf("instream.cpp");
-    while (inf.getline(line)) {
-        ...
-    }
+string line;
+Reader inf("instream.cpp");
+while (inf.getline(line)) {
+    ...
+}
 ```
 This is very much like the standard iostreams way of doing things; `Reader` objects
 convert to a status `bool`, so this loop will end when we hit an error, which is _usually_
@@ -270,13 +270,13 @@ any container that understands `push_back`. This has a convenient optional argum
 that is the maximum number of lines you wish to collect.
 
 ```cpp
-    vector<string> lines;
-    Reader inf("instream.cpp");
-    inf.getlines(lines); 
+vector<string> lines;
+Reader inf("instream.cpp");
+inf.getlines(lines);
 ```
 
-There is a `read(void *,int)` for reading binary objects, and `readall(string&)` which 
-slurps in the whole file without needing to know its size. (`std::string` is a very 
+There is a `read(void *,int)` for reading binary objects, and `readall(string&)` which
+slurps in the whole file without needing to know its size. (`std::string` is a very
 flexible data structure, if considered as a bunch of bytes, since its size does not
 depend on any silly NUL ending in the data.)
 
@@ -286,19 +286,19 @@ One way to explore an idea is to see how far you can push it. `Reader` overloads
 `operator()` just like `Writer`:
 
 ```cpp
-    int i;
-    double x;
-    string s;
+int i;
+double x;
+string s;
 
-    Reader rdr("input-test.txt"); 
-    // first line is '1 3.14 lines'
-    rdr (i) (x) (s);
-```    
+Reader rdr("input-test.txt");
+// first line is '1 3.14 lines'
+rdr (i) (x) (s);
+```
 Which is certainly compact!  But in an imperfect world, there are errors.
 
 The approach I take is for `Reader` to note errors when they first occur and
 thereafter perform _no_ input operations. So even if this file doesn't exist
-no terrible things will happen. But you must check the error state at some point!
+no terrible things will happen. But you must check the error state afterwards!
 
 ```cpp
     if (! rdr) {
@@ -307,14 +307,14 @@ no terrible things will happen. But you must check the error state at some point
 ```
 
 This just gives you a descriptive error string. More details are available using
-`Reader::Error` which is read as a pseudo-input-field. 
+`Reader::Error` which is read as a pseudo-input-field.
 
 ```cpp
     Reader::Error err;
     if (! rdr (i) (x) (s) (err)) {
         outs(err.errcode)(err.msg)(err.pos)();
     }
-
+```
 If the input line had a non-convertable field - say it is "1 xx3 lines" - then
 the error message will look like "error reading double '%lf%n' 'xx'" and
 `err.pos` will tell you where in the file this happened.  Although not strictly
@@ -329,7 +329,7 @@ to track position in the stream manually (using '%n') and not depend on the
 underlying `FILE*`, precisely to make this specialization possible.
 
 This is useful because C++ string handling is not very complete and instream
-operations complement them well, just as with `std::istrstream`.  Strings come to 
+operations complement them well, just as with `std::istrstream`.  Strings come to
 us from many sources that are not files.
 
 `CmdReader` wraps `popen` and overrides `close_handle` so that `pclose`
@@ -337,14 +337,16 @@ is called on the handle after destruction. `stderr` is redirected to `stdout` so
 that the stream captures all of the output, good or bad.
 
 ```cpp
-    vector<string> header_files;
-    CmdReader("ls *.h").getlines(header_files);
+vector<string> header_files;
+CmdReader("ls *.h").getlines(header_files);
 ```
 A common pattern is to invoke a simple command and capture the first line
-of output. Can use `getline` but a conversion-to-string is provided:
+of output. Can use `getline` but a conversion-to-string is provided (this is
+probably Evil, since it is very much not a const operator - it actually reads
+the first line)
 
 ```cpp
-    string platform = CmdReader("uname");
+string platform = CmdReader("uname");
 ```
 There is no reliable way of getting the _actual error_ when using `popen`, so
 workarounds are useful.  If it is a command where there is no output, or the output
