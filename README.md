@@ -240,3 +240,131 @@ outstreams 2937ms
 iostreams 4541ms
 
 ```
+
+## 'scanf' Considered Harmful
+
+Many still like using the `printf` family of functions, but the reputation of
+the `scanf` family is less certain, even among C programmers. The problem
+is that handling errors with `scanf` is a mission.  Jonathan Leffler on Stackoverflow
+expresses the conventional wisdom: "I don't use scanf() in production code; it is just
+too damn hard to control properly". And (for that matter) neither have I.
+
+However, there are some immediate advantages to doing a wrapper around
+`fgets`. Here is the very useful 'all lines in a file' pattern.
+
+```cpp
+#include "instream.h"
+...
+    string line;
+    Reader inf("instream.cpp");
+    while (inf.getline(line)) {
+        ...
+    }
+```
+This is very much like the standard iostreams way of doing things; `Reader` objects
+convert to a status `bool`, so this loop will end when we hit an error, which is _usually_
+EOF.  The file handle will be closed when `inf` goes out of scope.
+
+Another way to do this is use the template method `getlines`, which will work with
+any container that understands `push_back`. This has a convenient optional argument
+that is the maximum number of lines you wish to collect.
+
+```cpp
+    vector<string> lines;
+    Reader inf("instream.cpp");
+    inf.getlines(lines); 
+```
+
+There is a `read(void *,int)` for reading binary objects, and `readall(string&)` which 
+slurps in the whole file without needing to know its size. (`std::string` is a very 
+flexible data structure, if considered as a bunch of bytes, since its size does not
+depend on any silly NUL ending in the data.)
+
+## A Symmetrical approach to Wrapping stdio Input
+
+One way to explore an idea is to see how far you can push it. `Reader` overloads
+`operator()` just like `Writer`:
+
+```cpp
+    int i;
+    double x;
+    string s;
+
+    Reader rdr("input-test.txt"); 
+    // first line is '1 3.14 lines'
+    rdr (i) (x) (s);
+```    
+Which is certainly compact!  But in an imperfect world, there are errors.
+
+The approach I take is for `Reader` to note errors when they first occur and
+thereafter perform _no_ input operations. So even if this file doesn't exist
+no terrible things will happen. But you must check the error state at some point!
+
+```cpp
+    if (! rdr) {
+        outs(rdr.error())();
+    }
+```
+
+This just gives you a descriptive error string. More details are available using
+`Reader::Error` which is read as a pseudo-input-field. 
+
+```cpp
+    Reader::Error err;
+    if (! rdr (i) (x) (s) (err)) {
+        outs(err.errcode)(err.msg)(err.pos)();
+    }
+
+If the input line had a non-convertable field - say it is "1 xx3 lines" - then
+the error message will look like "error reading double '%lf%n' 'xx'" and
+`err.pos` will tell you where in the file this happened.  Although not strictly
+necessary, it is useful to check the error as soon as possible, close to the
+context where it happened.
+
+## Reading Strings and the Output of Commands
+
+`Reader` is overrideable, like `Writer`.  In particular, can use `StrReader` to parse
+strings - this overrides `raw_read_line` and `read_fmt`.  I went to some trouble
+to track position in the stream manually (using '%n') and not depend on the
+underlying `FILE*`, precisely to make this specialization possible.
+
+This is useful because C++ string handling is not very complete and instream
+operations complement them well, just as with `std::istrstream`.  Strings come to 
+us from many sources that are not files.
+
+`CmdReader` wraps `popen` and overrides `close_handle` so that `pclose`
+is called on the handle after destruction. `stderr` is redirected to `stdout` so
+that the stream captures all of the output, good or bad.
+
+```cpp
+    vector<string> header_files;
+    CmdReader("ls *.h").getlines(header_files);
+```
+A common pattern is to invoke a simple command and capture the first line
+of output. Can use `getline` but a conversion-to-string is provided:
+
+```cpp
+    string platform = CmdReader("uname");
+```
+There is no reliable way of getting the _actual error_ when using `popen`, so
+workarounds are useful.  If it is a command where there is no output, or the output
+is unneeded, then a shell trick is to silence all output and conditionally execute
+a following command. Here are two useful patterns, defined in `instream.h`:
+
+```cpp
+const std::string CMD_OK = "> /dev/null && echo OK";
+const std::string CMD_RETCODE = "> /dev/null || echo $?";
+...
+if (CmdReader("true",CMD_OK) == "OK") {
+    outs("true is OK");
+}
+if (CmdReader("false",CMD_OK) != "OK") {
+    outs("false is not OK");
+}
+
+if (CmdReader("g++",CMD_RETCODE) == "4") {
+    outs("no files provided")();
+}
+
+```
+
