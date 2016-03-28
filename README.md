@@ -231,8 +231,12 @@ Speaking of speed, how much speed are we losing relative to stdio?
 `speedtest.cpp` writes a million lines to a file; each line consists
 of five double values separated by spaces. Obviously we are
 calling the underlying formatted write function a lot more, but
-in the end it makes little difference:
+in the end it makes little difference, except that using iostreams seems
+rather slower:
 
 ```
+stdio 2720ms
+outstreams 2937ms
+iostreams 4541ms
 
 ```

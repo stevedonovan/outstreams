@@ -1,3 +1,6 @@
+// Lightweight operator() overloading stdio wrapper
+// Steve Donovan, (c) 2016
+// MIT license
 #include "outstream.h"
 using namespace std;
 

@@ -1,3 +1,7 @@
+// Lightweight operator() overloading stdio wrapper
+// Steve Donovan, (c) 2016
+// MIT license
+
 #ifndef __OUTSTREAM_H
 #define __OUTSTREAM_H
 #include <string>
