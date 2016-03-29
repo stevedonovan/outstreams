@@ -1,5 +1,5 @@
 # building and testing outstreams
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++11 -g
 OUTSTREAM = outstream.o
 INSTREAM = instream.o
 LDFLAGS = outstream.o
@@ -27,6 +27,10 @@ speedtest: speedtest.o $(OUTSTREAM)
 
 testins: testins.o  $(INSTREAM) $(OUTSTREAM)
 	$(CXX) -o $@ $< $(INSTREAM) $(OUTSTREAM)
+
+conversions: conversions.o  $(INSTREAM) $(OUTSTREAM)
+	$(CXX) -o $@ $< $(INSTREAM) $(OUTSTREAM)
+
 
 clean:
 	rm *.o
