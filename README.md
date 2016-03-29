@@ -301,19 +301,19 @@ thereafter perform _no_ input operations. So even if this file doesn't exist
 no terrible things will happen. But you must check the error state afterwards!
 
 ```cpp
-    if (! rdr) {
-        outs(rdr.error())();
-    }
+if (! rdr) {
+    outs(rdr.error())();
+}
 ```
 
 This just gives you a descriptive error string. More details are available using
 `Reader::Error` which is read as a pseudo-input-field.
 
 ```cpp
-    Reader::Error err;
-    if (! rdr (i) (x) (s) (err)) {
-        outs(err.errcode)(err.msg)(err.pos)();
-    }
+Reader::Error err;
+if (! rdr (i) (x) (s) (err)) {
+    outs(err.errcode)(err.msg)(err.pos)();
+}
 ```
 If the input line had a non-convertable field - say it is "1 xx3 lines" - then
 the error message will look like "error reading double '%lf%n' 'xx'" and
