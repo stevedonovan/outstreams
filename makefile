@@ -4,7 +4,7 @@ OUTSTREAM = outstream.o
 INSTREAM = instream.o
 LDFLAGS = outstream.o
 TESTS = testout speedtest testins
-all: $(TESTS)
+all: $(TESTS) conversions reader-lineinfo
 
 testout: testout.o $(OUTSTREAM)
 	$(CXX) -o $@ $< $(OUTSTREAM)
@@ -31,6 +31,8 @@ testins: testins.o  $(INSTREAM) $(OUTSTREAM)
 conversions: conversions.o  $(INSTREAM) $(OUTSTREAM)
 	$(CXX) -o $@ $< $(INSTREAM) $(OUTSTREAM)
 
+reader-lineinfo: reader-lineinfo.o  $(INSTREAM) $(OUTSTREAM)
+	$(CXX) -o $@ $< $(INSTREAM) $(OUTSTREAM)
 
 clean:
 	rm *.o

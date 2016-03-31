@@ -22,6 +22,11 @@ public:
 
       operator bool () { return errcode != 0; }
    };
+   
+   struct LineInfo {
+      int line;
+      int column;
+   };
 
    Reader(FILE *in);
    Reader(const char *file, const char *how="r");
@@ -32,6 +37,7 @@ public:
    bool fail();
    operator bool ();
    std::string error();
+   int error_code();
 
    void set(FILE *new_in, bool own);
    bool open(const std::string& file, const char *how="r");
@@ -69,6 +75,8 @@ public:
    Reader& getline(std::string& s);
 
    Reader& skip(int lines=1);
+   
+   LineInfo getlineinfo (long p=-1);
 
    template <class C>
    Reader& getlines(C& c, unsigned int lines=-1) {
