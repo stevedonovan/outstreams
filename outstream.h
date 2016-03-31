@@ -26,6 +26,7 @@ protected:
 
     virtual void write_char(char ch);
     virtual void write_out(const char *fmt, va_list ap);
+    virtual void put_eoln();
 
     void sep_out();
     Writer& formatted_write(const char *def, const char *fmt,...);
@@ -41,6 +42,7 @@ public:
     FILE *stream() { return out; }
 
     operator bool () { return out != nullptr; }
+    std::string error();
     
     void close();
     Writer& set(FILE *nout);
@@ -89,7 +91,7 @@ public:
 
     Writer& operator() ();
 
-    Writer& flush();
+    virtual Writer& flush();
 
     template <class T, class S>
     Writer& operator() (std::pair<T,S> pp, const char *fmt=nullptr) {
@@ -143,6 +145,7 @@ public:
 
     virtual void write_char(char ch);
     virtual void write_out(const char *fmt, va_list ap);
+    virtual Writer& flush() { return *this; }
 };
 
 typedef const char *pchar_;

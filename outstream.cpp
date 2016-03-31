@@ -3,9 +3,18 @@
 // MIT license
 #include "outstream.h"
 using namespace std;
+extern "C" char *strerror(int);
+
+string Writer::error() {
+    return strerror(errno);
+}
 
 void Writer::write_char(char ch) {
     fputc(ch,out);
+}
+
+void Writer::put_eoln() {
+    write_char('\n');
 }
 
 void Writer::write_out(const char *fmt, va_list ap) {
@@ -113,7 +122,7 @@ Writer& Writer::restore_sep(char sepr) {
 
 Writer& Writer::operator() () {
     eoln = true;
-    write_char('\n');
+    put_eoln();
     next_sepc = 0;
     return *this;
 }
