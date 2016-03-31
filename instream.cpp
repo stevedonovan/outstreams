@@ -2,6 +2,8 @@
 #include <errno.h>
 #include <string.h>
 
+const int line_size = 256;
+
 Reader::Reader(FILE *in)
   : in(in), owner(false),fpos(0),pos(0),bad(0)
 {
@@ -38,6 +40,10 @@ Reader::operator bool () {
   return ! fail();
 }
 
+int Reader::error_code() {
+    return bad;
+}
+
 std::string Reader::error() {
   return err_msg;
 }
@@ -59,49 +65,51 @@ bool Reader::open(const std::string& file, const char *how) {
     return ! bad;
 }
 
- void Reader::close_handle() {
+void Reader::close_handle() {
     fclose(in);
 }
 
- int Reader::read_fmt(const char *fmt, va_list ap) {
+int Reader::read_fmt(const char *fmt, va_list ap) {
     return vfscanf(in,fmt,ap);
 }
 
- char *Reader::read_raw_line(char *buff, int buffsize) {
+char *Reader::read_raw_line(char *buff, int buffsize) {
     return fgets(buff,buffsize,in);
 }
 
- size_t Reader::read(void *buff, int buffsize) {
-  if (fail()) return 0;
-  size_t sz = fread(buff,1,buffsize,in);
-  ((char*)buff)[sz] = 0;
-  return sz;
+size_t Reader::read(void *buff, int buffsize) {
+    if (fail()) return 0;
+    size_t sz = fread(buff,1,buffsize,in);
+    ((char*)buff)[sz] = 0;
+    return sz;
 }
 
 Reader& Reader::formatted_read(const char *ctype, const char *def, const char *fmt, ...) {
-  if (fail()) return *this;
-  va_list ap;
-  va_start(ap,fmt);
-  if (fmt == nullptr) {
-     fmt = def;
-  }
-  int res = read_fmt(fmt,ap);
-  int err = errno;
-  if (res == EOF || err != 0) {
-     err_msg = strerror(err);
-     bad = errno;
-  } else
-  if (res != 1 && *ctype != 'S') {
-     std::string chars;
-     (*this)(chars,"%5s");
-     err_msg = "error reading " + std::string(ctype) + " '" + std::string(fmt) + "' at  '" + chars + "'";
-     bad = 1;
-     //~ fprintf(stderr,"error for format '%s' at fpos %d %ld\n",fmt,pos,streampos());
-
-  }
-  pos += fpos;
-  va_end(ap);
-  return *this;
+    if (fail()) return *this;
+    va_list ap;
+    va_start(ap,fmt);
+    if (fmt == nullptr) {
+         fmt = def;
+    }
+    int res = read_fmt(fmt,ap);
+    if (res == EOF) {
+        if (errno != 0) { // we remain in hope
+            err_msg = strerror(errno);
+            bad = errno;
+        } else { // but invariably it just means EOF
+            err_msg = "EOF reading " + std::string(ctype);
+            bad = EOF;
+        }            
+    } else
+    if (res != 1 && *ctype != 'S') {
+         std::string chars;
+         (*this)(chars,"%5s");
+         err_msg = "error reading " + std::string(ctype) + " '" + std::string(fmt) + "' at  '" + chars + "'";
+         bad = 1;
+    }
+    pos += fpos;
+    va_end(ap);
+    return *this;
 }
 
 Reader& Reader::conversion_error(const char *kind, uint64_t val, bool was_unsigned) {
@@ -232,14 +240,14 @@ Reader& Reader::operator() (uint8_t &i,const char *fmt) {
 
 Reader& Reader::operator() (std::string &s,const char *fmt) {
   if (fail()) return *this;
-  char buff[256];
+  char buff[line_size];
   if (! formatted_read("string","%s%n",fmt,buff,&fpos)) return *this;
   s = buff;
   return *this;
 }
 
 Reader& Reader::operator() (const char *extra) {
-  char buff[256];
+  char buff[line_size];
   strcpy(buff,extra);
   strcat(buff,"%n");
   return formatted_read("S",extra,nullptr,&fpos);
@@ -251,8 +259,8 @@ Reader& Reader::operator() () {
 
 Reader& Reader::getline(std::string& s) {
   if (fail()) return *this;
-  char buff[256];
-  int n = read_line(buff,sizeof(buff));
+  char buff[line_size];
+  int n = read_line(buff,line_size);
   if (n > 0) {
      buff[n-1] = 0; // trim \n
      s = buff;
@@ -263,11 +271,29 @@ Reader& Reader::getline(std::string& s) {
 Reader& Reader::skip(int lines) {
   if (fail()) return *this;
   int i = 0;
-  char buff[256];
-  while (i < lines && read_line(buff,sizeof(buff)) > 0) {
+  char buff[line_size];
+  while (i < lines && read_line(buff,line_size) > 0) {
      ++i;
   }
   return *this;
+}
+
+Reader::LineInfo Reader::getlineinfo (long p) {
+    if (p == -1)
+        p = pos;
+    setpos(0,'^');
+    pos = 0;
+    char buff[line_size];
+    int last_pos, lineno = 1;
+    read_line(buff,line_size);
+    while (pos < p) {
+        lineno++;
+        last_pos = pos;
+        read_line(buff,line_size);
+    }
+    int col = p - last_pos;
+    setpos(p,'^');
+    return {lineno, col};
 }
 
 Reader ins(stdin);
