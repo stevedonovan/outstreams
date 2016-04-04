@@ -1,6 +1,7 @@
 #ifndef INSTREAMS_H
 #define INSTREAMS_H
 #include <stdio.h>
+#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <stdarg.h>
 #include <string>
@@ -22,7 +23,7 @@ public:
 
       operator bool () { return errcode != 0; }
    };
-   
+
    struct LineInfo {
       int line;
       int column;
@@ -75,7 +76,7 @@ public:
    Reader& getline(std::string& s);
 
    Reader& skip(int lines=1);
-   
+
    LineInfo getlineinfo (long p=-1);
 
    template <class C>

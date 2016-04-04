@@ -9,6 +9,7 @@
 #include <initializer_list>
 #include <stdio.h>
 #include <stdarg.h>
+#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
 class Writer;
@@ -43,7 +44,7 @@ public:
 
     operator bool () { return out != nullptr; }
     std::string error();
-    
+
     void close();
     Writer& set(FILE *nout);
 
@@ -100,7 +101,7 @@ public:
         (*this)(pp.first,fmt)(':')(pp.second,fmt);
         return restore_sep(osep);
     }
-    
+
     template <class T>
     Writer& operator() (const char *text, const T& v) {
         sep_out();
@@ -119,7 +120,7 @@ public:
         }
         return restore_sep(osep);
     }
-    
+
     template <class It>
     Writer& operator() (It start, It finis, char sepr) {
         return (*this)(start,finis,nullptr,sepr);
