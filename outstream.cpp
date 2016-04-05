@@ -60,8 +60,8 @@ Writer& Writer::formatted_write(const char *def, const char *fmt,...) {
     return *this;
 }
 
-Writer::Writer(FILE *out)
-    : out(out),sepc(0),eoln(true),owner(false),old_sepc(0),next_sepc(0)
+Writer::Writer(FILE *out,char sep)
+    : out(out),sepc(sep),eoln(true),owner(false),old_sepc(0),next_sepc(0)
 {
 }
 
@@ -132,8 +132,8 @@ Writer& Writer::flush() {
     return *this;
 }
 
-Writer outs(stdout);
-Writer errs(stderr);
+Writer outs(stdout,' ');
+Writer errs(stderr,' ');
 
 static char buf[128];
 

@@ -33,7 +33,7 @@ protected:
     Writer& formatted_write(const char *def, const char *fmt,...);
 
 public:
-    Writer(FILE *out);
+    Writer(FILE *out, char sep=0);
     Writer(const char *file);
     Writer(const std::string& file);
     Writer(const Writer& w, char sepc);
@@ -143,6 +143,7 @@ public:
 
     std::string str() { return s; }
     operator std::string () { return s; }
+    void clear() { s.clear(); }
 
     virtual void write_char(char ch);
     virtual void write_out(const char *fmt, va_list ap);
