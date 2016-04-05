@@ -34,6 +34,9 @@ conversions: conversions.o  $(INSTREAM) $(OUTSTREAM)
 reader-lineinfo: reader-lineinfo.o  $(INSTREAM) $(OUTSTREAM)
 	$(CXX) -o $@ $< $(INSTREAM) $(OUTSTREAM)
 
+testlog: testlog.o logger.o  $(OUTSTREAM)
+	$(CXX) -o $@ $<  logger.o $(OUTSTREAM) -llog4cpp
+
 clean:
 	rm *.o
 	rm $(TESTS)
