@@ -41,7 +41,7 @@ void writing_iterator_range() {
 
     // can specify the FORMAT and the SEPARATOR for a range
     string s = "\xFE\xEE\xAA";
-    outs(s.begin(),s.end(),O_HEX_BYTE,0)("and that's all")();
+    outs(s.begin(),s.end(),"X",0)("and that's all")();
 
     vector<int> vi {10,2,5,11,4};
     outs("bork")(vi.begin(),vi.end(),"%#X",',')("heh")();

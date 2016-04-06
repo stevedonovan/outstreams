@@ -44,12 +44,25 @@ void Writer::sep_out() {
 }
 
 Writer& Writer::formatted_write(const char *def, const char *fmt,...) {
-    if (fmt!=nullptr && fmt[1]==0) {
-        if (def[1] == 's') {
+    char copy_def[30];
+    if (fmt!=nullptr && fmt[1]==0) { // one-character special shortcut format codes
+        if (def[1] == 's') { // 'quote' or "quote" strings
             if (fmt[0] == 'q') fmt = "'%s'"; else
             if (fmt[0] == 'Q') fmt = "\"%s\"";
         } else {
-            fmt = nullptr;
+            if (fmt[0] == 'x' || fmt[0] == 'X') { // numbers as hex
+                const char *in = def;
+                char *out = copy_def;
+                while (*(in+1))  *out++ = *in++;
+                if (*in == 'c') { // special case - characters as bytes
+                    *out++ = 'h';   *out++ = 'h';
+                }
+                *out++ = fmt[0];
+                *out = 0;
+                fmt = copy_def;
+            } else {
+                fmt = nullptr;
+            }
         }
     }
     sep_out();

@@ -18,6 +18,7 @@ failed 1 error reading int64 '%lld%n' at  '.3'
 2 generally better 0 X
 +++all header files in this directory
 'instream.h'
+'logger.h'
 'outstream.h'
 +++file doesn't exist
 bonzo.txt doesn't exist No such file or directory

@@ -96,13 +96,12 @@ outs(vi.begin(),vi.end(),"'%d'",' ')();
 // --> '10' '20' '30'
 
 string s = "\xFE\xEE\xAA";
-outs(s.begin(),s.end(),O_HEX_BYTE)("and that's all")();
+outs(s.begin(),s.end(),"X")("and that's all")();
 // --> FEEEAA and that's all
 ```
-`O_HEX_BYTE` is "%hhX" - you need an explicit length to treat the
-fields as signed char and not their promoted value as signed int. This is
-another strength of individually specifying the format for an item; it's
-easy to give the format a symbolic name which is easier to remember.
+
+"X" and "x' are shortcuts like "Q" and "q'; can use them to get hexadecimal output
+of integers. 
 
 In the C++11 standard there is a marvelous class called `std::intializer_list`
 which is implicitly used in bracket initialization of containers. We overload it

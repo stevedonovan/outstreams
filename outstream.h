@@ -152,8 +152,4 @@ public:
 
 typedef const char *pchar_;
 
-const pchar_ O_HEX_BYTE = "%02hhX";
-const pchar_ O_HEX_SHORT = "%04hX";
-
-
 #endif
