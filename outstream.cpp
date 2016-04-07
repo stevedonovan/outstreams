@@ -123,7 +123,7 @@ char Writer::reset_sep(char sep) {
     char res = sepc;
     sepc = sep;
     eoln=true;
-    
+
     return res;
 }
 
@@ -150,7 +150,7 @@ Writer errs(stderr,' ');
 
 static char buf[128];
 
-StrWriter::StrWriter(char sepr, size_t capacity) : Writer((FILE *)nullptr) {
+StrWriter::StrWriter(char sepr, size_t capacity) : Writer(stderr) {
     if (capacity != 0) {
         s.reserve(capacity);
     }
