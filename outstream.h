@@ -14,6 +14,11 @@
 
 class Writer;
 
+class Writeable {
+public:
+   virtual void write_to(Writer&,const char*) const = 0;
+};
+
 void Writer_streamer(Writer& w, const int& v);
 
 class Writer {
@@ -88,6 +93,16 @@ public:
 
     Writer& operator() (void *p, const char *fmt=nullptr) {
         return formatted_write("%p",fmt,p);
+    }
+
+    Writer& operator() (const Writeable& w, const char *fmt=nullptr) {
+       w.write_to(*this,fmt);
+       return *this;
+    }
+
+    Writer& operator() (const Writeable* w, const char *fmt=nullptr) {
+       w->write_to(*this,fmt);
+       return *this;
     }
 
     Writer& operator() ();

@@ -12,9 +12,10 @@ bork 0XA,0X2,0X5,0XB,0X4 heh
 *building strings
 42 and 3.4
 *custom Point output
-point (10,100) !
+(10,100)!
 *custom vector<T> output
 ints 10 2 5 11 4 doubles 10.1 20.5 30.05
+points (1,2)(3,4)
 *macro magic
 full_name "bonzo the dog" id_number 666
 id_number 0X0000000000029A

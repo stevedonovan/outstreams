@@ -2,19 +2,21 @@
 #include <vector>
 using namespace std;
 
-struct Point {
+class Point: public Writeable {
     int X;
     int Y;
+public:
+    Point(int X, int Y) : X(X),Y(Y) { }
+
+    virtual void write_to(Writer& out, const char *) const {
+        out.fmt("(%d,%d)",X,Y);
+    }
 };
 
-void Writer_streamer(Writer& w, const Point& p) {
-     w.fmt("(%d,%d)",p.X,p.Y);
-}
-
  void custom_type_point() {
-    outs("*custom Point output")(); 
-    Point P{10,100};
-    outs("point ",P)('!')();
+    outs("*custom Point output")();
+    Point P(10,100);
+    outs(P)('!')();
 }
 
 template <class T>
@@ -26,8 +28,9 @@ void custom_type_vector() {
     outs("*custom vector<T> output")();
     vector<int> vi {10,2,5,11,4};
     vector<double> vd {10.1,20.5,30.05};
-
+    vector<Point> vp {Point(1,2),Point(3,4)};
     outs("ints ",vi)("doubles ",vd)();
+    outs("points ",vp)();
 
 }
 
@@ -45,7 +48,7 @@ void writing_iterator_range() {
 
     vector<int> vi {10,2,5,11,4};
     outs("bork")(vi.begin(),vi.end(),"%#X",',')("heh")();
-    
+
     outs(vi.begin(),vi.end(),',')();
 
     // write out a quick little burst of json
@@ -60,12 +63,12 @@ void writing_iterator_range() {
 }
 
 int writing_to_file() {
-    outs("*writing to file")(); 
+    outs("*writing to file")();
     double x = 1.1, y = 2.0, z = 2.8;
     Writer("test.txt").sep(',')(x)(y)(z)();
     return system("cat test.txt");
 }
- 
+
 void building_strings() {
     outs("*building strings")();
     StrWriter sw(' ');
@@ -82,9 +85,9 @@ void macro_magic() {
     uint64_t  id_number = 666;
 
     outs VA(full_name) VA(id_number)   ();
-    
+
     outs VX64(id_number) ();
-    
+
     #undef VA
     #undef VX64
 }
@@ -100,17 +103,17 @@ void outstream_tests() {
     double x = 3.1412;
 
     outs(s)(i)(x)("finis")();
-    
+
     writing_iterator_range();
 
     writing_to_file();
-    
+
     building_strings();
 
     custom_type_point();
 
     custom_type_vector();
-    
+
     macro_magic();
 
  }
