@@ -5,8 +5,11 @@
 #ifndef __OUTSTREAM_H
 #define __OUTSTREAM_H
 #include <string>
-//#include <utility>
+#ifndef OLD_STD_CPP
 #include <initializer_list>
+#else
+#define nullptr NULL
+#endif
 #include <stdio.h>
 #include <stdarg.h>
 #define __STDC_FORMAT_MACROS
@@ -17,6 +20,7 @@ class Writer;
 class Writeable {
 public:
    virtual void write_to(Writer&,const char*) const = 0;
+   std::string to_string(const char* fmt = nullptr);
 };
 
 void Writer_streamer(Writer& w, const int& v);
@@ -141,10 +145,12 @@ public:
         return (*this)(start,finis,nullptr,sepr);
     }
 
+#ifndef OLD_STD_CPP
     template <class T>
     Writer& operator() (const std::initializer_list<T>& arr, const char *fmt=nullptr, char sepr=' ') {
         return (*this)(arr.begin(),arr.end(),fmt,sepr);
     }
+#endif
 
 };
 

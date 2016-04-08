@@ -5,6 +5,12 @@
 using namespace std;
 extern "C" char *strerror(int);
 
+string Writeable::to_string(const char* fmt) {
+   StrWriter sw;
+   write_to(sw,fmt);
+   return sw.str();
+}
+
 string Writer::error() {
     return strerror(errno);
 }
