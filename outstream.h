@@ -9,6 +9,7 @@
 #include <initializer_list>
 #else
 #define nullptr NULL
+#include <errno.h>
 #endif
 #include <stdio.h>
 #include <stdarg.h>
@@ -171,6 +172,15 @@ public:
     virtual Writer& flush() { return *this; }
 };
 
-typedef const char *pchar_;
+class BufWriter: public Writer {
+    char *P;
+    char *P_end;
+public:
+    BufWriter(char *buff, int size, char sep=0);
 
+    virtual void write_char(char ch);
+    virtual void write_out(const char *fmt, va_list ap);
+    virtual Writer& flush() { *P++ = '\0'; return *this; }
+};
+    
 #endif

@@ -20,5 +20,11 @@ int main()
    StrWriter sw;
    sw(floats,floats+3,' ');
    outs(sw.str())();
+   
+   char buff[1024];
+   BufWriter bw(buff,sizeof(buff));
+   // flush appends '\0'; can directly do this as ('\0')
+   bw(floats,floats+3,' ')(" and that's it").flush();
+   outs(buff)();
    return 0;
 }

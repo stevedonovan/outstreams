@@ -172,5 +172,24 @@ void StrWriter::write_out(const char *fmt, va_list ap) {
     s.append(buf,nch);
 }
 
+BufWriter::BufWriter(char *buff, int size, char sepr): Writer(stderr), P(buff),P_end(buff+size) {
+    sep(sepr);
+}
+
+void BufWriter::write_char(char ch) {
+    *P++ = ch;
+}
+
+void BufWriter::write_out(const char *fmt, va_list ap) {
+    int nch = vsnprintf(P,sizeof(buf),fmt,ap);
+    char *next = P + nch;
+    if (next < P_end) {
+        P = next;
+    } else {
+        out = nullptr;
+    }
+}
+
+
 //// FINIS
 

@@ -30,7 +30,7 @@ void custom_type_vector() {
     vector<double> vd {10.1,20.5,30.05};
     vector<Point> vp {Point(1,2),Point(3,4)};
     outs("ints ",vi)("doubles ",vd)();
-    outs("points ",vp)();
+    outs("points ",v_tp)();
 
 }
 
