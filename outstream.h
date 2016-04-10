@@ -77,6 +77,7 @@ public:
     }
 
     Writer& operator() (char ch, const char *fmt=nullptr) {
+        if (ch == '\n') return (*this)();
         return formatted_write("%c",fmt,ch);
     }
 
@@ -182,5 +183,11 @@ public:
     virtual void write_out(const char *fmt, va_list ap);
     virtual Writer& flush() { *P++ = '\0'; return *this; }
 };
+
+typedef const char *str_t_;
+const str_t_ WRITE_HEX_UP="X";
+const str_t_ WRITE_HEX_LOW="x";
+const str_t_ WRITE_QUOTE_D="S";
+const str_t_ WRITE_QUOTE_S="s";
     
 #endif

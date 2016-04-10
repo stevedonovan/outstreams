@@ -16,7 +16,7 @@ public:
  void custom_type_point() {
     outs("*custom Point output")();
     Point P(10,100);
-    outs(P)('!')();
+    outs(P)('!')('\n');
 }
 
 template <class T>
@@ -25,18 +25,19 @@ void Writer_streamer(Writer& w, const vector<T>& v) {
 }
 
 void custom_type_vector() {
-    outs("*custom vector<T> output")();
+    outs("*custom vector<T> output")('\n');
     vector<int> vi {10,2,5,11,4};
     vector<double> vd {10.1,20.5,30.05};
     vector<Point> vp {Point(1,2),Point(3,4)};
-    outs("ints ",vi)("doubles ",vd)();
-    outs("points ",v_tp)();
+    outs("ints ",vi)("doubles ",vd)('\n');
+    outs("points ",vp)('\n');
 
 }
 
 void writing_iterator_range() {
     outs("*iterator range")();
      // the convenience of initializer lists
+    /// empty () is equivalent to ('\n')
     outs({10,20,30})();
 
     float arr[] {1.2,1.5,2.1};
@@ -102,7 +103,7 @@ void outstream_tests() {
     string s = "hello you";
     double x = 3.1412;
 
-    outs(s)(i)(x)("finis")();
+    outs(s)(i)(x)("finis")('\n');
 
     writing_iterator_range();
 
