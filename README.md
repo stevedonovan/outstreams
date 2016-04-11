@@ -28,9 +28,13 @@ Here are the basic capabilties of outstreams. The `Writer` class can be
 initialized with a standard stream (like `stdout` and `stderr`, or a file name.
 The object maintans ownership of the `FILE*` in this case, so destruction
 closes the file.  `Writer` is overridable so constructing strings is
-straightforward, avoiding the ugliness of naked `sprintf`.
+straightforward, avoiding the ugliness of naked `sprintf`. Everything is inside
+the `stream` namespace, although I'm careful to avoid collisions with `std`
+ - [this table](http://www.bobarcher.org/software/C++11%20Symbols.html) is
+ an excellent resource.
 
 ```cpp
+using namespace stream;
 double x = 1.2;
 const char *msg = "hello";
 int i = 42;
@@ -56,23 +60,20 @@ is overriden to mean 'write out a field"
 outs.sep(' ');
 // separator is 'sticky' - remains set until reset.
 
-outs(x)(msg)(i)();
+outs(x)(msg)(i)('\n\);
 // --> 1.2 hello 42
 
-outs(msg,"'%s'")();
+outs(msg,"'%s'")('\n');
 // --> 'hello'
 ```
-The last statement has _exactly_ the same formatting as the first statement; the
-empty call outputs '\n' and sets the eoln state so that we will not get
-a separator on the start of the next line.
 
 The advantage of the call operator is that it may have extra optional arguments,
-in this case an explicit format.  "'%s'" is a bit clumsy, so "q" can be used here
-("Q" for double quotes). The real power of 'q/Q' comes when it is applied to
+in this case an explicit format.  "'%s'" is a bit clumsy, so `quote_s` can be used here
+(`quote_d` for double quotes). The real power of these constants is when applied to
 multiple fields, since only the string fields will obey it.
 
 The standard algorithm `for_each` can be used to dump out a container, since
-it expects a callable.
+it expects a _callable.
 
 ```cpp
 vector<int> vi {10,20,30};
@@ -85,23 +86,29 @@ outs();
 
 The above idiom is common enough that there is a  template version of
 `operator()` for displaying the elements of a container. Note that the
-sticky separator is not used - since we cannot guarantee it will be suitable.
+sticky separator is not used - since we cannot guarantee it will be suitable; you provide
+a separator in addition to the usual format.  The `trace()` adapter takes two forms;
+the first wraps a _container_ and the second an explicit iterator range.
 
 ```cpp
 // default format, list separator
-outs(vi.begin(),vi.end(),',')();
+outs(range(vi),0,',')('\n');
 // --> 10,20,30
 
-outs(vi.begin(),vi.end(),"'%d'",' ')();
+outs(range(vi),"'%d'",' ')('\n');
 // --> '10' '20' '30'
 
+int arr[] {10,20,30};
+outs(range(arr,arr+3),0,' ')('\n');
+// --> 10 20 30
+
 string s = "\xFE\xEE\xAA";
-outs(s.begin(),s.end(),"X")("and that's all")();
+outs(range(s),hex_u)("and that's all")('\n');
 // --> FEEEAA and that's all
 ```
-
-"X" and "x' are shortcuts like "Q" and "q'; can use them to get hexadecimal output
-of integers. 
+`hex_u` and `hex_l` are constants for hex format; if you try the obvious '%X' you
+will notice the problem; without the length modifier the value is printed out as an `int`
+and sign-extended.
 
 In the C++11 standard there is a marvelous class called `std::intializer_list`
 which is implicitly used in bracket initialization of containers. We overload it
@@ -117,7 +124,7 @@ outs('{')({
     make_pair("hello",42),
     make_pair("dolly",99),
     make_pair("frodo",111)
-},"Q",',')('}')();
+},quote_d,',')('}')();
 // --> { "hello":42,"dolly":99,"frodo":111 }
 
 // which will also work when iterating over `std::map`
@@ -160,43 +167,30 @@ intended as a humble 'serving suggestion'.
 
 The more common form of extension in iostreams is to teach it to output
 your own types, simply by adding yet another overload for `operator<<`.
-`operator()` may only be defined as a method of a type; a
-overloadable plain function called `Writer_streamer` is defined for this
-purpose.
+Alas, `operator()` may only be defined as a method of a type. In the first
+version of this library I had an ugly and inconsistent scheme, and finally
+settled on an old-fashioned solution; your types must implement a `Writeable` interface:
 
 ```cpp
-struct Point {
+struct Point: public Writeable {
     int X;
     int Y;
+
+    Point(int X, int Y) : X(X),Y(Y) {}
+
+    void write_to(Writer& w, const char *format) {
+        w.fmt("(%d,%d)",p.X,p.Y);
+    }
+
 };
 
- void Writer_streamer(Writer& w, const Point& p) {
-     w.fmt("(%d,%d)",p.X,p.Y);
- }
  ...
 
-Point P{10,100};
-outs("point ",P)();
-// --> point (10,20)
-
-...
-
-template <class T>
-void Writer_streamer(Writer& w, const vector<T>& v) {
-     w(v.begin(),v.end());
-}
-
-vector<int> vi {10,2,5,11,4};
-vector<double> vd {10.1,20.5,30.05};
-outs("ints ",vi)("doubles ",vd)();
-// --> ints 10 2 5 11 4 doubles 10.1 20.5 30.05
+Point P(10,100);
+outs(P)('\n');
+// --> (10,20)
 
 ```
-Alas, but my attempts to completely define `operator()` as a template
-were frustrated by the specificity of template type deduction. So the custom
-template operator has the signature `(const char *,const T& v)`.
-It would be extremely cool if someone could show the way
-forward here.
 
 ## Output in a Hurry
 
@@ -206,7 +200,7 @@ outstreams provides a useful low-cost alternative for `printf` here where
 the exact formatting isn't so important.
 
 ```cpp
-#define VA(var) (#var "=")(var,"Q")
+#define VA(var) (#var "=")(var,quote_s)
 ...
 string full_name;
 uint64_t  id_number;

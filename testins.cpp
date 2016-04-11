@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     Reader inf("instream.cpp");
     while (inf.getline(s3)) {
         if (s3.find('#')==0)
-            outs(s3)();
+            outs(s3)(eol);
     }
     // this will normally happen when inf goes out of scope
     inf.close();
@@ -30,59 +30,59 @@ int main(int argc, char **argv)
     inf.open("instream.cpp");
     inf.getlines(lines,4);
     inf.close();
-    outs(lines.begin(),lines.end(),"q")();
+    outs(range(lines),quote_s)(eol);
 
     outs("+++read variables from file")();
     Reader rdr("input-test.txt");
 
     rdr(i)(x)(s1);
-    outs(i)(x)(s1,"q")();
+    outs(i)(x)(s1,"q")(eol);
 
     // this line fails since there's no good match for res
     // () means grab rest of line and continue...
     // (err) captures error state of instream
     rdr(i)(s1)(s2)()(res)(ch)(err);
     if (err) {
-        outs("failed")(err.errcode)(err.msg)();
+        outs("failed")(err.errcode)(err.msg)(eol);
     }
-    outs(i)(s1)(s2)(res)(ch)();
+    outs(i)(s1)(s2)(res)(ch)(eol);
 
 
-   outs("+++read input-test.txt contents")();
-   string contents;
-   Reader("input-test.txt").readall(contents);
-   outs(contents)();
+    outs("+++read input-test.txt contents")();
+    string contents;
+    Reader("input-test.txt").readall(contents);
+    outs(contents)(eol);
 
     outs("+++read from string with errors")();
     StrReader sc(contents);
     sc()(i)(s1)(s2)()(res)(ch)(err);
     if (err) {
-        outs("failed")(err.errcode)(err.msg)();
+        outs("failed")(err.errcode)(err.msg)(eol);
     }
-    outs(i)(s1)(s2)(res)(ch)();
+    outs(i)(s1)(s2)(res)(ch)(eol);
 
     outs("+++all header files in this directory")();
     lines.clear();
     CmdReader("ls *.h").getlines(lines);
-    for (string L : lines) outs(L,"q")();
+    for (string L : lines) outs(L,quote_s)(eol);
 
     outs("+++file doesn't exist")();
     Reader b("bonzo.txt");
     b(res);
     if (! b) {
-       outs("bonzo.txt doesn't exist")(b.error())();
+       outs("bonzo.txt doesn't exist")(b.error())(eol);
     }
 
     outs("+++CmdReader result available as string conversion")();
     string s = CmdReader("uname");
-    outs("uname")(s)();
+    outs("uname")(s)(eol);
 
     outs("+++More reliable way to execute commands silently and test errors")();
     if (CmdReader("true",CMD_OK) == "OK") {
-        outs("true is OK")();
+        outs("true is OK")(eol);
     }
     if (CmdReader("false",CMD_OK) != "OK") {
-        outs("false is not OK")();
+        outs("false is not OK")(eol);
     }
 
     /*

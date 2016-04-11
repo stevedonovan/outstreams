@@ -20,6 +20,7 @@ namespace stream {
 
 class Writer;
 
+/// implement this interface for your type to be printable with outstreams
 class Writeable {
 public:
    virtual void write_to(Writer&,const char*) const = 0;
@@ -33,16 +34,20 @@ struct Range_ {
    Range_(It begin, It end) : begin(begin), end(end) { }
 };
 
+/// the range() helper for printing explicit begin..end iteration - concept Container
 template <typename It>
 Range_<It> range(It begin, It end) {
    return Range_<It>(begin,end);
 }
 
+/// the range() helper for containers that support begin/end iteration
 template <typename C>
 Range_<typename C::const_iterator> range(const C& c) {
    return Range_<typename C::const_iterator>(c.begin(),c.end());
 }
 
+/// Writer is a class that overloads operator() for outputing values;
+// this implementation is over stdio
 class Writer {
 protected:
     FILE *out;
@@ -60,27 +65,39 @@ protected:
     Writer& formatted_write(const char *def, const char *fmt,...);
 
 public:
+    /// wrap a stdio stream, with optional field separator
     Writer(FILE *out, char sep=0);
+
+    // open a file for writing
+    // see also open() and close()
     Writer(const char *file);
     Writer(const std::string& file);
+
     Writer(const Writer& w, char sepc);
 
     ~Writer();
 
+    // access to the stdio stream
     FILE *stream() { return out; }
-
+    // this object fails if there's no stream defined
     operator bool () { return out != nullptr; }
+    // provide actual error string
     std::string error();
 
     void close();
     Writer& set(FILE *nout);
 
+    /// simple wrapper over `fprintf`, same limitations
     Writer& fmt(const char *fmtstr,...);
 
+    ///// Field Separator Control /////
+    /// set the field separator (default none)
     Writer& sep(int ch = 0);
+    /// reset the field separator
     char reset_sep(char sep=0);
     Writer& restore_sep(char sepr);
 
+    /// overloads of operator() for various types
     Writer& operator() (const char *s, const char *fmt=nullptr) {
         return formatted_write("%s",fmt,s);
     }
@@ -128,10 +145,13 @@ public:
        return *this;
     }
 
+    /// empty operator() means 'end of line'; use ('\n') as an equivalent form if this is too terse
     Writer& operator() ();
 
+    /// flush the stream _explicitly_
     virtual Writer& flush();
 
+    /// conveniet overload for std::pair - puts a colon between two printable values
     template <class T, class S>
     Writer& operator() (std::pair<T,S> pp, const char *fmt=nullptr) {
         sep_out();
@@ -140,6 +160,7 @@ public:
         return restore_sep(osep);
     }
 
+    // overload for range() wrapper representing an iterator sequence
     template <class It>
     Writer& operator() (const Range_<It>& rr, const char *fmt=nullptr, char sepr=' ') {
         sep_out();
@@ -149,11 +170,6 @@ public:
             (*this)(*ii,fmt);
         }
         return restore_sep(osep);
-    }
-
-    template <class It>
-    Writer& operator() (It start, It finis, char sepr) {
-        return (*this)(start,finis,nullptr,sepr);
     }
 
 #ifndef OLD_STD_CPP
@@ -197,7 +213,9 @@ typedef const char *str_t_;
 const str_t_ hex_u="X";
 const str_t_ hex_l="x";
 const str_t_ quote_d="Q";
-const str_t_ quote_l="q";
+const str_t_ quote_s="q";
+const char eol='\n';
+const char eos='\0';
 
 } // namespace stream
 
