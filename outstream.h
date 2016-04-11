@@ -26,6 +26,23 @@ public:
    std::string to_string(const char* fmt = nullptr);
 };
 
+template <typename It>
+struct Range_ {
+   It begin;
+   It end;
+   Range_(It begin, It end) : begin(begin), end(end) { }
+};
+
+template <typename It>
+Range_<It> range(It begin, It end) {
+   return Range_<It>(begin,end);
+}
+
+template <typename C>
+Range_<typename C::const_iterator> range(const C& c) {
+   return Range_<typename C::const_iterator>(c.begin(),c.end());
+}
+
 class Writer {
 protected:
     FILE *out;
@@ -124,11 +141,12 @@ public:
     }
 
     template <class It>
-    Writer& operator() (It start, It finis, const char *fmt=nullptr, char sepr=' ') {
+    Writer& operator() (const Range_<It>& rr, const char *fmt=nullptr, char sepr=' ') {
         sep_out();
         char osep = reset_sep(sepr);
-        for(; start != finis; ++start) {
-            (*this)(*start,fmt);
+        It ii = rr.begin;
+        for(;  ii != rr.end; ++ii) {
+            (*this)(*ii,fmt);
         }
         return restore_sep(osep);
     }
@@ -141,7 +159,7 @@ public:
 #ifndef OLD_STD_CPP
     template <class T>
     Writer& operator() (const std::initializer_list<T>& arr, const char *fmt=nullptr, char sepr=' ') {
-        return (*this)(arr.begin(),arr.end(),fmt,sepr);
+        return (*this)(range(arr),fmt,sepr);
     }
 #endif
 
@@ -178,8 +196,8 @@ public:
 typedef const char *str_t_;
 const str_t_ hex_u="X";
 const str_t_ hex_l="x";
-const str_t_ quote_d="S";
-const str_t_ quote_l="s";
+const str_t_ quote_d="Q";
+const str_t_ quote_l="q";
 
 } // namespace stream
 

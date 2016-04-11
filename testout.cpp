@@ -27,16 +27,16 @@ void writing_iterator_range() {
     outs({10,20,30})();
 
     float arr[] {1.2,1.5,2.1};
-    outs(arr,arr+3)();
+    vector<int> vi {10,2,5,11,4};
+    outs(range(arr,arr+3))();
+    outs(range(vi))();
 
     // can specify the FORMAT and the SEPARATOR for a range
     string s = "\xFE\xEE\xAA";
-    outs(s.begin(),s.end(),"X",0)("and that's all")();
+    outs(range(s),"X",0)("and that's all")();
 
-    vector<int> vi {10,2,5,11,4};
-    outs("bork")(vi.begin(),vi.end(),"%#X",',')("heh")();
 
-    outs(vi.begin(),vi.end(),',')();
+    outs("bork")(range(vi),"%#X",',')("heh")();
 
     // write out a quick little burst of json
     // The hex_u format (double-quoted) only applies to text fields
@@ -45,7 +45,7 @@ void writing_iterator_range() {
         make_pair("hello",42),
         make_pair("dolly",99),
         make_pair("frodo",111)
-    },hex_u,',')('}')();
+    },quote_d,',')('}')();
 
 }
 
