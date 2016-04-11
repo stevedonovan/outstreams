@@ -2,11 +2,12 @@
 #include <fstream>
 #include <time.h>
 using namespace std;
+using namespace stream;
 
 static uint64_t millisecs() {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME,&ts);
-    return 1000L*ts.tv_sec + ts.tv_nsec/1000000L;    
+    return 1000L*ts.tv_sec + ts.tv_nsec/1000000L;
 }
 
 double x1 = 1000,x2 = 1001,x3 = 1003,x4 = 1004,x5 = 1005;
@@ -33,12 +34,12 @@ void testwrite_f(string file) {
 
 void testwrite_i(string file) {
     ofstream out(file);
-    
+
     for (int i = 0; i < N; i++) {
         out << x1 << ' ' << x2 << ' ' << x3
              << ' ' << x4 << ' ' << x5 << '\n';
-    }    
-    
+    }
+
 }
 
 typedef uint64_t U64;
@@ -52,11 +53,11 @@ int main(int argc, char **argv)
     U64 diff = millisecs() - start;
     U64 stdio_ms = diff;
     outs("stdio ")(diff)("ms")();
-    start = millisecs();    
+    start = millisecs();
     testwrite_s("s.dat");
     diff = millisecs() - start;
     outs("outstreams ")(diff)("ms")();
-    start = millisecs();    
+    start = millisecs();
     testwrite_i("io.dat");
     diff = millisecs() - start;
     outs("iostreams ")(diff)("ms")();

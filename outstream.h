@@ -16,6 +16,8 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
+namespace stream {
+
 class Writer;
 
 class Writeable {
@@ -23,8 +25,6 @@ public:
    virtual void write_to(Writer&,const char*) const = 0;
    std::string to_string(const char* fmt = nullptr);
 };
-
-void Writer_streamer(Writer& w, const int& v);
 
 class Writer {
 protected:
@@ -123,15 +123,6 @@ public:
         return restore_sep(osep);
     }
 
-    template <class T>
-    Writer& operator() (const char *text, const T& v) {
-        sep_out();
-        char osep = reset_sep();
-        (*this)(text);
-        Writer_streamer(*this,v);
-        return restore_sep(osep);
-    }
-
     template <class It>
     Writer& operator() (It start, It finis, const char *fmt=nullptr, char sepr=' ') {
         sep_out();
@@ -185,9 +176,12 @@ public:
 };
 
 typedef const char *str_t_;
-const str_t_ WRITE_HEX_UP="X";
-const str_t_ WRITE_HEX_LOW="x";
-const str_t_ WRITE_QUOTE_D="S";
-const str_t_ WRITE_QUOTE_S="s";
-    
+const str_t_ hex_u="X";
+const str_t_ hex_l="x";
+const str_t_ quote_d="S";
+const str_t_ quote_l="s";
+
+} // namespace stream
+
+
 #endif

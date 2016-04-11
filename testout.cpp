@@ -1,6 +1,7 @@
 #include "outstream.h"
 #include <vector>
 using namespace std;
+using namespace stream;
 
 class Point: public Writeable {
     int X;
@@ -17,21 +18,6 @@ public:
     outs("*custom Point output")();
     Point P(10,100);
     outs(P)('!')('\n');
-}
-
-template <class T>
-void Writer_streamer(Writer& w, const vector<T>& v) {
-    w(v.begin(),v.end());
-}
-
-void custom_type_vector() {
-    outs("*custom vector<T> output")('\n');
-    vector<int> vi {10,2,5,11,4};
-    vector<double> vd {10.1,20.5,30.05};
-    vector<Point> vp {Point(1,2),Point(3,4)};
-    outs("ints ",vi)("doubles ",vd)('\n');
-    outs("points ",vp)('\n');
-
 }
 
 void writing_iterator_range() {
@@ -53,13 +39,13 @@ void writing_iterator_range() {
     outs(vi.begin(),vi.end(),',')();
 
     // write out a quick little burst of json
-    // The Q format (double-quoted) only applies to text fields
+    // The hex_u format (double-quoted) only applies to text fields
     // so can be safely passed for all times. q means single-quoted
     outs('{')({
         make_pair("hello",42),
         make_pair("dolly",99),
         make_pair("frodo",111)
-    },"Q",',')('}')();
+    },hex_u,',')('}')();
 
 }
 
@@ -112,8 +98,6 @@ void outstream_tests() {
     building_strings();
 
     custom_type_point();
-
-    custom_type_vector();
 
     macro_magic();
 

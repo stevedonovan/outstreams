@@ -1,6 +1,7 @@
 #include "instream.h"
 #include "outstream.h"
 using namespace std;
+using namespace stream;
 
 int main()
 {
@@ -11,13 +12,13 @@ int main()
         if (tok == "Reader::getlineinfo") {
             // Reader::LineInfo Reader::getlineinfo (long p) {
             string type, mname;
-            rdr (type)(mname); 
+            rdr (type)(mname);
             outs("type")(type,"q")(",")("name")(mname,"q")();
             break;
         }
     }
     auto pos = rdr.getlineinfo();
     outs("line")(pos.line)("column")(pos.column)();
-  
+
     return 0;
 }

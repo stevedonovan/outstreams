@@ -2,6 +2,7 @@
 #include "outstream.h"
 #include <vector>
 using namespace std;
+using namespace stream;
 
 template <typename T>
 Writer& print(T v) {
@@ -47,7 +48,7 @@ int main()
    vector<string> ss {"hello","dolly"};
    print(ss)();
    
-   print("answer as hex",fmt(answer,"X"))();
+   print("answer as hex",fmt(answer,hex_u))();
  
    return 0;
 }

@@ -5,6 +5,8 @@
 using namespace std;
 extern "C" char *strerror(int);
 
+namespace stream {
+
 string Writeable::to_string(const char* fmt) {
    StrWriter sw;
    write_to(sw,fmt);
@@ -188,6 +190,8 @@ void BufWriter::write_out(const char *fmt, va_list ap) {
     } else {
         out = nullptr;
     }
+}
+
 }
 
 

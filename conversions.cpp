@@ -1,6 +1,7 @@
 #include "outstream.h"
 #include "instream.h"
 using namespace std;
+using namespace stream;
 
 void test(const char *str) {
    Reader::Error err;
