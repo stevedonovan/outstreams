@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     Reader rdr("input-test.txt");
 
     rdr(i)(x)(s1);
-    outs(i)(x)(s1,"q")(eol);
+    outs(i)(x)(s1,quote_s)(eol);
 
     // this line fails since there's no good match for res
     // () means grab rest of line and continue...
@@ -73,17 +73,22 @@ int main(int argc, char **argv)
        outs("bonzo.txt doesn't exist")(b.error())(eol);
     }
 
-    outs("+++CmdReader result available as string conversion")();
-    string s = CmdReader("uname");
-    outs("uname")(s)(eol);
+    outs("+++CmdReader result")();
+    string line = CmdReader("uname").line();
+    outs("uname")(line)(eol);
 
-    outs("+++More reliable way to execute commands silently and test errors")();
-    if (CmdReader("true",CMD_OK) == "OK") {
+    outs("+++How to execute commands silently and test errors")();
+    string result = CmdReader("true",cmd_ok).line();   
+    if (result == "OK") {
         outs("true is OK")(eol);
     }
-    if (CmdReader("false",CMD_OK) != "OK") {
+    if (CmdReader("false",cmd_ok).line() != "OK") {
         outs("false is not OK")(eol);
     }
+
+    int retcode;
+    CmdReader("false",cmd_retcode) (retcode);
+    outs("actual retcode")(retcode)(eol);
 
     /*
 

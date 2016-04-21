@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <string>
 
+namespace stream {
 class Reader {
 protected:
    FILE *in;
@@ -99,16 +100,14 @@ class CmdReader: public Reader {
 public:
    CmdReader(std::string cmd, std::string extra="");
 
-   bool operator == (std::string s);
-   bool operator != (std::string s);
-
    virtual void close_handle();
+   
+   std::string line();
 
-   operator std::string ();
 };
 
-const std::string CMD_OK = "> /dev/null && echo OK";
-const std::string CMD_RETCODE = "> /dev/null || echo $?";
+const std::string cmd_ok = "> /dev/null && echo OK";
+const std::string cmd_retcode = "> /dev/null || echo $?";
 
 class StrReader: public Reader {
 protected:
@@ -123,6 +122,7 @@ public:
    virtual long getpos();
    virtual void setpos(long p, char end='^');
 };
+}
 #endif
 
 

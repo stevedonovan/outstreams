@@ -2,6 +2,8 @@
 #include <errno.h>
 #include <string.h>
 
+namespace stream {
+
 const int line_size = 256;
 
 Reader::Reader(FILE *in)
@@ -104,7 +106,7 @@ Reader& Reader::formatted_read(const char *ctype, const char *def, const char *f
     if (res != 1 && *ctype != 'S') {
          std::string chars;
          (*this)(chars,"%5s");
-         err_msg = "error reading " + std::string(ctype) + " '" + std::string(fmt) + "' at  '" + chars + "'";
+         err_msg = "error reading " + std::string(ctype) + " at '" + chars + "'";
          bad = 1;
     }
     pos += fpos;
@@ -260,10 +262,18 @@ Reader& Reader::operator() () {
 Reader& Reader::getline(std::string& s) {
   if (fail()) return *this;
   char buff[line_size];
+  s.clear();
   int n = read_line(buff,line_size);
-  if (n > 0) {
-     buff[n-1] = 0; // trim \n
-     s = buff;
+  while (n > 1) {
+    if (buff[n-1]=='\n') {
+       --n;
+       buff[n] = 0; // trim \n
+       s.append(buff,n);
+       break;
+    } else {
+       s.append(buff,n);
+    }
+    n = read_line(buff,line_size);
   }
   return *this;
 }
@@ -304,23 +314,16 @@ CmdReader::CmdReader(std::string cmd, std::string extra)
   set(popen(cmdline.c_str(),"r"),true);
 }
 
-bool CmdReader::operator == (std::string s) {
-    return ((std::string)*this) == s;
-}
-
-bool CmdReader::operator != (std::string s) {
-    return ((std::string)*this) != s;
-}
-
- void CmdReader::close_handle() {
+void CmdReader::close_handle() {
     pclose(in);
 }
 
-CmdReader::operator std::string () {
+std::string CmdReader::line() {
     std::string tmp;
     getline(tmp);
     return tmp;
 }
+
 
 StrReader::StrReader(const std::string& s) : Reader((FILE*)nullptr), pc(s.c_str()) {
     size = s.size();
@@ -341,7 +344,7 @@ int StrReader::read_fmt(const char *fmt, va_list ap) {
     char *P = buff;
     const char *Q = pc+pos;
     int i = 1;
-    while (*Q != '\n' && *Q != 0) {
+    while (*Q != '\n' && i < buffsize && *Q != 0) {
         *P++ = *Q++;
         ++i;
     }
@@ -365,5 +368,6 @@ void StrReader::setpos(long p, char end) {
     }
 }
 
+}
 
 
