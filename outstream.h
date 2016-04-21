@@ -109,6 +109,10 @@ public:
     Writer& operator() (int i, const char *fmt=nullptr) {
         return formatted_write("%d",fmt,i);
     }
+    
+    Writer& operator() (unsigned int i, const char *fmt=nullptr) {
+        return formatted_write("%u",fmt,i);
+    }    
 
     Writer& operator() (char ch, const char *fmt=nullptr) {
         if (ch == '\n') return (*this)();
@@ -151,7 +155,7 @@ public:
     /// flush the stream _explicitly_
     virtual Writer& flush();
 
-    /// conveniet overload for std::pair - puts a colon between two printable values
+    /// convienient overload for std::pair - puts a colon between two printable values
     template <class T, class S>
     Writer& operator() (std::pair<T,S> pp, const char *fmt=nullptr) {
         sep_out();

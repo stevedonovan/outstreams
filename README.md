@@ -142,7 +142,9 @@ static char buf[128];
 class StrWriter: public Writer {
     std::string s;
 public:
-    StrWriter(char sepr=0, size_t capacity = 0) {
+    StrWriter(char sepr=0, size_t capacity = 0)
+    : Writer(stderr)
+     {
         if (capacity != 0) {
             s.reserve(capacity);
         }
@@ -151,6 +153,7 @@ public:
 
     std::string str() { return s; }
     operator std::string () { return s; }
+    void clear() { s.clear(); }
 
     virtual void write_char(char ch) {
         s += ch;
@@ -160,6 +163,8 @@ public:
         int nch = vsnprintf(buf,sizeof(buf),fmt,ap);
         s.append(buf,nch);
     }
+    
+    virtual Writer& flush() { return *this; }
 };
 ```
 No doubt this can be improved (keep a resizable line buffer) but this is
@@ -334,30 +339,26 @@ vector<string> header_files;
 CmdReader("ls *.h").getlines(header_files);
 ```
 A common pattern is to invoke a simple command and capture the first line
-of output. Can use `getline` but a conversion-to-string is provided (this is
-probably Evil, since it is very much not a const operator - it actually reads
-the first line)
+of output. Can use `getline` but a convenient `line` method
+is provided:
 
 ```cpp
-string platform = CmdReader("uname");
+string platform = CmdReader("uname").line();
 ```
 There is no reliable way of getting the _actual error_ when using `popen`, so
 workarounds are useful.  If it is a command where there is no output, or the output
 is unneeded, then a shell trick is to silence all output and conditionally execute
-a following command. Here are two useful patterns, defined in `instream.h`:
+a following command.
 
 ```cpp
-const std::string CMD_OK = "> /dev/null && echo OK";
-const std::string CMD_RETCODE = "> /dev/null || echo $?";
-...
-if (CmdReader("true",CMD_OK) == "OK") {
+if (CmdReader("true",cmd_ok).line() == "OK") {
     outs("true is OK");
 }
-if (CmdReader("false",CMD_OK) != "OK") {
+if (CmdReader("false",cmd_ok).line() != "OK") {
     outs("false is not OK");
 }
 
-if (CmdReader("g++",CMD_RETCODE) == "4") {
+if (CmdReader("g++",cmd_retcode) == "4") {
     outs("no files provided")();
 }
 

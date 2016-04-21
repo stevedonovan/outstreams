@@ -3,6 +3,7 @@
 #include "outstream.h"
 #include <vector>
 using namespace std;
+using namespace stream;
 
 int main()
 {
@@ -14,17 +15,18 @@ int main()
    vi.push_back(10);
    vi.push_back(20);
    vi.push_back(30);
-   outs(vi.begin(),vi.end(),',')();
+   outs(range(vi),0,',')();
+   
    
    float floats[] = {1.2,4.2,5};
    StrWriter sw;
-   sw(floats,floats+3,' ');
+   sw(range(floats,floats+3),0,' ');
    outs(sw.str())();
    
    char buff[1024];
    BufWriter bw(buff,sizeof(buff));
-   // flush appends '\0'; can directly do this as ('\0')
-   bw(floats,floats+3,' ')(" and that's it").flush();
+   bw(range(floats,floats+3),0,' ')(" and that's it")('\0');
    outs(buff)();
+   
    return 0;
 }
