@@ -1,6 +1,6 @@
 # print template
 STD=c++11
-CXXFLAGS = -std=$(STD) -Os $(DEFINES)
+CXXFLAGS = -std=$(STD) -g $(DEFINES)
 OUTSTREAM = outstream.o
 LDFLAGS = outstream.o
 TARGET = print
