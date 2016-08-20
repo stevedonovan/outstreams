@@ -82,7 +82,6 @@ char *Reader::read_raw_line(char *buff, int buffsize) {
 size_t Reader::read(void *buff, int buffsize) {
     if (fail()) return 0;
     size_t sz = fread(buff,1,buffsize,in);
-    ((char*)buff)[sz] = 0;
     return sz;
 }
 
@@ -101,7 +100,7 @@ Reader& Reader::formatted_read(const char *ctype, const char *def, const char *f
         } else { // but invariably it just means EOF
             err_msg = "EOF reading " + std::string(ctype);
             bad = EOF;
-        }            
+        }
     } else
     if (res != 1 && *ctype != 'S') {
          std::string chars;

@@ -86,13 +86,13 @@ Writer::Writer(FILE *out,char sep)
 {
 }
 
-Writer::Writer(const char *file)
-    : out(fopen(file,"w")), sepc(0), eoln(true), owner(true),old_sepc(0),next_sepc(0)
+Writer::Writer(const char *file, const char *how)
+    : out(fopen(file,how)), sepc(0), eoln(true), owner(true),old_sepc(0),next_sepc(0)
 {
 }
 
-Writer::Writer(const string& file)
-    : out(fopen(file.c_str(),"w")), sepc(0), eoln(true), owner(true),old_sepc(0),next_sepc(0)
+Writer::Writer(const string& file, const char *how)
+    : out(fopen(file.c_str(),how)), sepc(0), eoln(true), owner(true),old_sepc(0),next_sepc(0)
 {
 }
 
@@ -131,13 +131,11 @@ char Writer::reset_sep(char sep) {
     char res = sepc;
     sepc = sep;
     eoln=true;
-
     return res;
 }
 
 Writer& Writer::restore_sep(char sepr) {
     sep(sepr);
-//        sep_out();
     return *this;
 }
 
@@ -151,6 +149,25 @@ Writer& Writer::operator() () {
 Writer& Writer::flush() {
     fflush(out);
     return *this;
+}
+
+long Writer::getpos() {
+    return ftell(out);
+}
+
+void Writer::setpos(long p, char end) {
+    int whence = SEEK_SET;
+    if (end == '$') {
+        whence = SEEK_END;
+    } else
+    if (end == '.') {
+        whence = SEEK_CUR;
+    }
+    fseek(out,p,whence);
+}
+
+int Writer::write(void *buf, int bufsize) {
+    return fwrite(buf, bufsize, 1, out);
 }
 
 Writer outs(stdout,' ');

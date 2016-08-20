@@ -70,12 +70,12 @@ public:
 
     // open a file for writing
     // see also open() and close()
-    Writer(const char *file);
-    Writer(const std::string& file);
+    Writer(const char *file, const char *how="w");
+    Writer(const std::string& file, const char *how="w");
 
     Writer(const Writer& w, char sepc);
 
-    ~Writer();
+    virtual ~Writer();
 
     // access to the stdio stream
     FILE *stream() { return out; }
@@ -109,10 +109,10 @@ public:
     Writer& operator() (int i, const char *fmt=nullptr) {
         return formatted_write("%d",fmt,i);
     }
-    
+
     Writer& operator() (unsigned int i, const char *fmt=nullptr) {
         return formatted_write("%u",fmt,i);
-    }    
+    }
 
     Writer& operator() (char ch, const char *fmt=nullptr) {
         if (ch == '\n') return (*this)();
@@ -152,8 +152,13 @@ public:
     /// empty operator() means 'end of line'; use ('\n') as an equivalent form if this is too terse
     Writer& operator() ();
 
+    int write(void *buf, int bufsize);
+
     /// flush the stream _explicitly_
-    virtual Writer& flush();
+   virtual Writer& flush();
+   virtual long getpos();
+   virtual void setpos(long p, char end='^');
+
 
     /// convienient overload for std::pair - puts a colon between two printable values
     template <class T, class S>
