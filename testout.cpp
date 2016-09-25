@@ -88,8 +88,9 @@ void outstream_tests() {
     int i = 10;
     string s = "hello you";
     double x = 3.1412;
+    long n = 34343;
 
-    outs(s)(i)(x)("finis")('\n');
+    outs(s)(i)(x)(n)("finis")('\n');
 
     writing_iterator_range();
 

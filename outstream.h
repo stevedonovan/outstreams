@@ -113,6 +113,15 @@ public:
     Writer& operator() (unsigned int i, const char *fmt=nullptr) {
         return formatted_write("%u",fmt,i);
     }
+    
+    Writer& operator() (long i, const char *fmt=nullptr) {
+        return formatted_write("%ld",fmt,i);
+    }
+
+    Writer& operator() (unsigned long i, const char *fmt=nullptr) {
+        return formatted_write("%lu",fmt,i);
+    }
+    
 
     Writer& operator() (char ch, const char *fmt=nullptr) {
         if (ch == '\n') return (*this)();
