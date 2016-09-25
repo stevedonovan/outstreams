@@ -85,6 +85,11 @@ size_t Reader::read(void *buff, int buffsize) {
     return sz;
 }
 
+void Reader::set_error(const std::string& msg, int code) {
+    err_msg = msg;
+    bad = code;
+}
+
 Reader& Reader::formatted_read(const char *ctype, const char *def, const char *fmt, ...) {
     if (fail()) return *this;
     va_list ap;
@@ -95,18 +100,15 @@ Reader& Reader::formatted_read(const char *ctype, const char *def, const char *f
     int res = read_fmt(fmt,ap);
     if (res == EOF) {
         if (errno != 0) { // we remain in hope
-            err_msg = strerror(errno);
-            bad = errno;
+            set_error(strerror(errno),errno);
         } else { // but invariably it just means EOF
-            err_msg = "EOF reading " + std::string(ctype);
-            bad = EOF;
+            set_error("EOF reading " + std::string(ctype),EOF);
         }
     } else
     if (res != 1 && *ctype != 'S') {
          std::string chars;
          (*this)(chars,"%5s");
-         err_msg = "error reading " + std::string(ctype) + " at '" + chars + "'";
-         bad = 1;
+         set_error("error reading " + std::string(ctype) + " at '" + chars + "'",1);
     }
     pos += fpos;
     va_end(ap);
@@ -115,12 +117,13 @@ Reader& Reader::formatted_read(const char *ctype, const char *def, const char *f
 
 Reader& Reader::conversion_error(const char *kind, uint64_t val, bool was_unsigned) {
    bad = ERANGE;
-   err_msg = "error converting " + std::string(kind) + " out of range ";
+   std::string msg = "error converting " + std::string(kind) + " out of range ";
    if (was_unsigned) {
-      err_msg += std::to_string(val);
+      msg += std::to_string(val);
    } else {
-      err_msg += std::to_string((int64_t)val);
+      msg += std::to_string((int64_t)val);
    }
+   set_error(msg,1);
    return *this;
 }
 
@@ -142,8 +145,7 @@ long Reader::getpos() {
 int Reader::read_line(char *buff, int buffsize) {
   char *res = read_raw_line(buff,buffsize);
   if (res == nullptr) {
-     bad = 1;
-     err_msg = "EOF";
+     set_error("EOF",EOF);
      return 0;
   }
   int sz = res != nullptr ? strlen(res) : 0;
@@ -155,10 +157,9 @@ bool Reader::readall (std::string& s) {
   char buff[512];
   size_t sz;
   s.clear();
-  do {
-     sz = read(buff,sizeof(buff));
+  while ((sz = read(buff,sizeof(buff))) > 0) {
      s.append(buff,sz);
-  } while (sz == sizeof(buff));
+  }
   return errno != 0;
 }
 
@@ -179,7 +180,7 @@ Reader& Reader::operator() (double &i,const char *fmt) {
 }
 
 Reader& Reader::operator() (float &i,const char *fmt) {
-  return formatted_read("double","%f%n",fmt,&i,&fpos);
+  return formatted_read("float","%f%n",fmt,&i,&fpos);
 }
 
 Reader& Reader::operator() (int64_t &i,const char *fmt) {
@@ -196,7 +197,6 @@ Reader& Reader::operator() (int32_t &i,const char *fmt) {
    if (val < INT32_MIN || val > INT32_MAX) return conversion_error("int32",val,false);
    i = (int16_t)val;
    return *this;
-  //~ return formatted_read("int32","%" SCNd32 "%n",fmt,&i,&fpos);
 }
 
 Reader& Reader::operator() (uint32_t &i,const char *fmt) {
@@ -205,7 +205,6 @@ Reader& Reader::operator() (uint32_t &i,const char *fmt) {
    if (val > UINT32_MAX) return conversion_error("uint32",val,true);
    i = (uint32_t)val;
    return *this;
-  //~ return formatted_read("uint32","%" SCNu32 "%n",fmt,&i,&fpos);
 }
 
 Reader& Reader::operator() (int16_t &i,const char *fmt) {
@@ -214,7 +213,6 @@ Reader& Reader::operator() (int16_t &i,const char *fmt) {
    if (val < INT16_MIN || val > INT16_MAX) return conversion_error("int16",val,false);
    i = (int16_t)val;
    return *this;
-  //~ return formatted_read("int16","%" SCNd16 "%n",fmt,&i,&fpos);
 }
 
 Reader& Reader::operator() (uint16_t &i,const char *fmt) {
@@ -223,7 +221,6 @@ Reader& Reader::operator() (uint16_t &i,const char *fmt) {
    if (val > UINT16_MAX) return conversion_error("uint16",val,true);
    i = (uint16_t)val;
    return *this;
-  //~ return formatted_read("uint16","%" SCNu16 "%n",fmt,&i,&fpos);
 }
 
 Reader& Reader::operator() (char &i,const char *fmt) {
@@ -236,7 +233,6 @@ Reader& Reader::operator() (uint8_t &i,const char *fmt) {
    if (val > UINT8_MAX) return conversion_error("uchar",val,true);
    i = (uint8_t)val;
    return *this;
-   //return formatted_read("uchar","%" SCNd8 "%n",fmt,&i,&fpos);
 }
 
 Reader& Reader::operator() (std::string &s,const char *fmt) {
