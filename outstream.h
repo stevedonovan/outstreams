@@ -106,23 +106,14 @@ public:
         return (*this)(s.c_str(),fmt);
     }
 
-    Writer& operator() (int i, const char *fmt=nullptr) {
-        return formatted_write("%d",fmt,i);
+    Writer& operator() (int32_t i, const char *fmt=nullptr) {
+        return formatted_write("%" PRIi32,fmt,i);
     }
 
-    Writer& operator() (unsigned int i, const char *fmt=nullptr) {
-        return formatted_write("%u",fmt,i);
+    Writer& operator() (uint32_t i, const char *fmt=nullptr) {
+        return formatted_write("%" PRIu32,fmt,i);
     }
     
-    Writer& operator() (long i, const char *fmt=nullptr) {
-        return formatted_write("%ld",fmt,i);
-    }
-
-    Writer& operator() (unsigned long i, const char *fmt=nullptr) {
-        return formatted_write("%lu",fmt,i);
-    }
-    
-
     Writer& operator() (char ch, const char *fmt=nullptr) {
         if (ch == '\n') return (*this)();
         return formatted_write("%c",fmt,ch);
