@@ -40,6 +40,7 @@ public:
    operator bool ();
    std::string error();
    int error_code();
+   void set_error(const std::string& msg, int code);
 
    void set(FILE *new_in, bool own);
    bool open(const std::string& file, const char *how="r");
@@ -48,6 +49,17 @@ public:
    virtual int read_fmt(const char *fmt, va_list ap);
    virtual char *read_raw_line(char *buff, int buffsize);
    virtual size_t read(void *buff, int buffsize);
+   
+   template <typename T>
+   Reader& read(T& data) {
+    if (! fail()) {
+        size_t sz = fread(&data,1,sizeof(T),in);
+        if (sz != sizeof(T)) {
+            set_error("expected " + std::to_string(sizeof(T)) + " got " + std::to_string(sz) + " bytes",EOF);
+        }
+    }
+    return *this;
+   } 
 
    Reader& formatted_read(const char *ctype, const char *def, const char *fmt, ...);
    Reader& conversion_error(const char *kind, uint64_t val, bool was_unsigned);
@@ -81,10 +93,10 @@ public:
    LineInfo getlineinfo (long p=-1);
 
    template <class C>
-   Reader& getlines(C& c, unsigned int lines=-1) {
+   Reader& getlines(C& c, size_t lines=-1) {
       if (fail()) return *this;
       std::string tmp;
-      unsigned int i = 0;
+      size_t i = 0;
       while (i < lines && getline(tmp)) {
          c.push_back(tmp);
          ++i;
