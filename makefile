@@ -22,6 +22,10 @@ test_in: testins
 	
 tests: test_out test_in
 
+$(INSTREAM): instream.cpp instream.h
+
+$(OUTSTREAM): outstream.cpp outstream.h
+
 speedtest: speedtest.o $(OUTSTREAM)
 	$(CXX) -o $@ $< $(OUTSTREAM)
 
